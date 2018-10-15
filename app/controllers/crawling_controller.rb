@@ -9,8 +9,10 @@ class CrawlingController < ApplicationController
     slack_notify msg
     log.info msg
     $account_num = 1
-    $client_id = ENV['crawling_ids'][$account_num-1]
-    $client_secret = ENV['crawling_secrets'][$account_num-1]
+    $crawling_ids = ENV['crawling_ids'].split(',')
+    $crawling_secrets = ENV['crawling_secrets'].split(',')
+    $client_id = $crawling_ids[$account_num-1]
+    $client_secret = $crawling_secrets[$account_num-1]
     main log
   end
 
@@ -163,10 +165,10 @@ class CrawlingController < ApplicationController
 
         log.info info
         slack_notify info
-        return finishing_processing log, lat, lng, json_data["count"] unless $account_num < ENV['crawling_ids'].length
+        return finishing_processing log, lat, lng, json_data["count"] unless $account_num < $crawling_ids.length
         $account_num += 1
-        $client_id = ENV['crawling_ids'][$account_num-1]
-        $client_secret = ENV['crawling_secrets'][$account_num-1]
+        $client_id = $crawling_ids[$account_num-1]
+        $client_secret = $crawling_secrets[$account_num-1]
       elsif response_code != 200
         info = <<-EOC
 
