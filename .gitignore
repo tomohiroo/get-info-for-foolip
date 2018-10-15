@@ -24,4 +24,3 @@
 # ここから自分で
 config/secrets.yml
 config/database.yml
-public/crawling.json

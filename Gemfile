@@ -27,22 +27,12 @@ gem 'bootsnap', '>= 1.1.0', require: false
 gem 'rack-cors'
 
 gem 'devise'
-gem 'active_model_serializers'
 gem 'faraday'
 gem 'activerecord-import'
 gem "typhoeus"
 gem 'seed-fu'
-gem 'rjb'
-gem 'kuromoji-ruby'
-gem 'romaji'
-gem 'zipang'
 gem 'geokit-rails'
-# gem 'newrelic_rpm'
 gem "slack-notifier"
-gem 'whenever', :require => false
-gem "komachi_heartbeat"
-gem "selenium-webdriver"
-gem "nokogiri"
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -53,9 +43,6 @@ group :development, :test do
   gem 'hirb'
   gem 'hirb-unicode'
   gem 'binding_of_caller'
-  gem 'rspec-rails'
-  gem 'factory_bot_rails'
-  # gem 'activerecord-cause'
 end
 
 group :development do

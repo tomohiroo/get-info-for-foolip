@@ -5,25 +5,8 @@ namespace :crawling do
 
   DOMAIN = "https://api.foursquare.com/v2"
 
-  def create_proxy_url
-    Selenium::WebDriver::Chrome.driver_path = "/usr/local/bin/chromedriver"
-    options = Selenium::WebDriver::Chrome::Options.new
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    driver = Selenium::WebDriver.for :chrome, options: options
-    driver.navigate.to 'http://www.cybersyndrome.net/plr6.html'
-    2.upto 31 do |i|
-      driver.find_element(:xpath, "//*[@id='content']/table/tbody/tr[#{i}]/td[4]")
-      if driver.find_element(:xpath, "//*[@id='content']/table/tbody/tr[#{i}]/td[4]").text != "D"
-        ip = driver.find_element(:xpath, "//*[@id='n#{i-1}']").text
-        driver.quit
-        return "http://#{ip}"
-      end
-    end
-  end
-
   def search params
-    conn = Faraday.new url: "#{DOMAIN}/venues/search"#, proxy: create_proxy_url)
+    conn = Faraday.new url: "#{DOMAIN}/venues/search"
     conn.get do |req|
       req.params[:client_id] = $client_id
       req.params[:client_secret] = $client_secret
@@ -39,31 +22,6 @@ namespace :crawling do
 
   def get_details ids
     restaurant_hashes = []
-    # ids.each do |id|
-    #   conn = Faraday.new url: "#{DOMAIN}/venues/#{id}"#, proxy: create_proxy_url
-    #   response = conn.get do |req|
-    #     req.params[:client_id] = $client_id
-    #     req.params[:client_secret] = $client_secret
-    #     req.params[:v] = Rails.application.secrets.foursquare_version
-    #     req.params[:locale] = "ja"
-    #   end
-    #   status = JSON.parse(response.body)["meta"]["code"]
-    #   return status if status == 429
-    #   venue = JSON.parse(response.body)["response"]["venue"]
-    #   if venue["id"].blank?
-    #     slack_notify "errorが起きました。"
-    #     slack_notify venue
-    #     log.info venue
-    #   end
-    #   new_restaurant, category, pictures, station = Restaurant.build_with_foursquare_hash venue
-    #   detail = new_restaurant.attributes
-    #   detail[:category] = category
-    #   detail[:pictures] = pictures
-    #   detail[:station] = station
-    #   restaurant_hashes << { restaurant: new_restaurant, detail: detail }
-    #   sleep rand 3
-    # end
-
     hydra = Typhoeus::Hydra.new
     ids.each do |id|
       request = Typhoeus::Request.new(
@@ -75,7 +33,6 @@ namespace :crawling do
           v: Rails.application.secrets.foursquare_version,
           locale: "ja"
         }
-        # ,proxy: create_proxy_url
       )
       request.on_complete do |response|
         status = JSON.parse(response.body)["meta"]["code"]
@@ -193,8 +150,7 @@ count: #{json_data["count"]} / 48279 (#{(json_data["count"] / 48279.0 * 10000).r
 
       log.info info
       slack_notify info
-      # 一旦一個で終了
-      return finishing_processing log, lat, lng, json_data["count"]# unless $account_num < Rails.application.secrets.crawling_ids.length
+      return finishing_processing log, lat, lng, json_data["count"] unless $account_num < Rails.application.secrets.crawling_ids.length
       $account_num += 1
       $client_id = Rails.application.secrets.crawling_ids[$account_num-1]
       $client_secret = Rails.application.secrets.crawling_secrets[$account_num-1]
@@ -274,11 +230,7 @@ DBのレストランの件数: #{Restaurant.count}
 
   desc "foursquareからレストラン情報をクローリングする"
   task :get_restaurants => :environment do
-    if Rails.env.production? || Rails.env.staging?
-      log = Logger.new '/home/tomohiroo/pecopeco/shared/log/crawling.log'
-    else
-      log = Logger.new Rails.root.join('log/crawling.log')
-    end
+    log = Logger.new '/home/tomohiroo/pecopeco/shared/log/crawling.log'
     msg = 'クローリングを開始します。'
     slack_notify msg
     log.info msg
