@@ -28,26 +28,11 @@
 #        rails_disk_service GET    /rails/active_storage/disk/:encoded_key/*filename(.:format)                              active_storage/disk#show
 # update_rails_disk_service PUT    /rails/active_storage/disk/:encoded_token(.:format)                                      active_storage/disk#update
 #      rails_direct_uploads POST   /rails/active_storage/direct_uploads(.:format)                                           active_storage/direct_uploads#create
-# 
+#
 # Routes for KomachiHeartbeat::Engine:
 #    heartbeat GET  /heartbeat(.:format)    komachi_heartbeat/heartbeat#index {:format=>"txt"}
 #      version GET  /version(.:format)      komachi_heartbeat/heartbeat#version
 # stats_worker GET  /stats/worker(.:format) komachi_heartbeat/stats#worker
 
 Rails.application.routes.draw do
-  mount KomachiHeartbeat::Engine => "/ops"
-  devise_for :users
-  namespace :v1, defaults: { format: :json } do
-    resources :users, only: [:index, :create]
-    resources :restaurants, only: :index do
-      get 'distance', on: :member
-    end
-    resources :clips do
-      post 'share', on: :collection
-    end
-    resources :boards
-    resources :clip_categories, only: [:create, :destroy]
-    resources :categories, only: :index
-    resources :stations, only: :index
-  end
 end
