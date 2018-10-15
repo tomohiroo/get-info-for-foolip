@@ -9,8 +9,8 @@ class CrawlingController < ApplicationController
     slack_notify msg
     log.info msg
     $account_num = 1
-    $client_id = Rails.application.secrets.crawling_ids[$account_num-1]
-    $client_secret = Rails.application.secrets.crawling_secrets[$account_num-1]
+    $client_id = ENV['crawling_ids'][$account_num-1]
+    $client_secret = ENV['crawling_secrets'][$account_num-1]
     main log
   end
 
@@ -23,7 +23,7 @@ class CrawlingController < ApplicationController
       conn.get do |req|
         req.params[:client_id] = $client_id
         req.params[:client_secret] = $client_secret
-        req.params[:v] = Rails.application.secrets.foursquare_version
+        req.params[:v] = ENV['foursquare_version']
         req.params[:locale] = "ja"
         req.params[:intent] = "browse"
         req.params[:ll] = params[:ll]
@@ -43,7 +43,7 @@ class CrawlingController < ApplicationController
           params: {
             client_id: $client_id,
             client_secret: $client_secret,
-            v: Rails.application.secrets.foursquare_version,
+            v: ENV['foursquare_version'],
             locale: "ja"
           }
         )
@@ -117,7 +117,7 @@ class CrawlingController < ApplicationController
     end
 
     def slack_notify info
-      slack_webhook_url = Rails.application.secrets.slack_webhook_url
+      slack_webhook_url = ENV['slack_webhook_url']
       notifier = Slack::Notifier.new slack_webhook_url do
         defaults username: "クローリングマン"
       end
@@ -163,10 +163,10 @@ class CrawlingController < ApplicationController
 
         log.info info
         slack_notify info
-        return finishing_processing log, lat, lng, json_data["count"] unless $account_num < Rails.application.secrets.crawling_ids.length
+        return finishing_processing log, lat, lng, json_data["count"] unless $account_num < ENV['crawling_ids'].length
         $account_num += 1
-        $client_id = Rails.application.secrets.crawling_ids[$account_num-1]
-        $client_secret = Rails.application.secrets.crawling_secrets[$account_num-1]
+        $client_id = ENV['crawling_ids'][$account_num-1]
+        $client_secret = ENV['crawling_secrets'][$account_num-1]
       elsif response_code != 200
         info = <<-EOC
 
