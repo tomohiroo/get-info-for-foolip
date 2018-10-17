@@ -106,6 +106,7 @@ class CrawlingController < ApplicationController
     def complete_processing lat, lng, count
       info = <<-EOC
 
+    <!channel>
     ==============================================================
     領域内のクローリングが全て完了しました！！！。
     lat: #{lat}
@@ -151,7 +152,7 @@ class CrawlingController < ApplicationController
         info = <<-EOC
 
     =========================================================
-    foursquare (apikey: #{$client_secret}) の回数上限に達しました。
+    #{$account_num}つ目のfoursquare (apikey: #{$client_secret})の回数上限に達しました。
     lat: #{lat}
     lng: #{lng}
     response_code: #{response_code}
