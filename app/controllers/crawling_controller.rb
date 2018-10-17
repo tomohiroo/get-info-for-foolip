@@ -89,15 +89,15 @@ class CrawlingController < ApplicationController
     def finishing_processing lat, lng, count
       info = <<-EOC
 
-    ==============================================================
-    処理を終了します。
-    lat: #{lat}
-    lng: #{lng}
-    count: #{count} / 48279 (#{(count / 48279.0 * 10000).round / 100.0}%)
-    Google Maps: "https://www.google.co.jp/maps/search/#{lat},#{lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
+==============================================================
+処理を終了します。
+lat: #{lat}
+lng: #{lng}
+count: #{count} / 48279 (#{(count / 48279.0 * 10000).round / 100.0}%)
+Google Maps: "https://www.google.co.jp/maps/search/#{lat},#{lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
 
-    DBのレストランの件数: #{Restaurant.count}
-    ==============================================================
+DBのレストランの件数: #{Restaurant.count}
+==============================================================
       EOC
       puts info
       slack_notify info
@@ -106,16 +106,16 @@ class CrawlingController < ApplicationController
     def complete_processing lat, lng, count
       info = <<-EOC
 
-    <!channel>
-    ==============================================================
-    領域内のクローリングが全て完了しました！！！。
-    lat: #{lat}
-    lng: #{lng}
-    Google Maps: "https://www.google.co.jp/maps/search/#{lat},#{lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
-    count: #{count} / 48279 (#{(count / 48279.0 * 10000).round / 100.0}%)
+<!channel>
+==============================================================
+領域内のクローリングが全て完了しました！！！。
+lat: #{lat}
+lng: #{lng}
+Google Maps: "https://www.google.co.jp/maps/search/#{lat},#{lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
+count: #{count} / 48279 (#{(count / 48279.0 * 10000).round / 100.0}%)
 
-    DBのレストランの件数: #{Restaurant.count}
-    ==============================================================
+DBのレストランの件数: #{Restaurant.count}
+==============================================================
       EOC
       puts info
       slack_notify info
@@ -151,19 +151,19 @@ class CrawlingController < ApplicationController
       if response_code == 429
         info = <<-EOC
 
-    =========================================================
-    #{$account_num}つ目のfoursquare (apikey: #{$client_secret})の回数上限に達しました。
-    lat: #{lat}
-    lng: #{lng}
-    response_code: #{response_code}
-    response_body: #{response_body}
-    errorが起きたapi: #{error_api}
-    保存したレストランの件数: #{get_restaurants_num}
-    DBのレストランの件数: #{Restaurant.count}
-    lat: #{lat}
-    lng: #{lng}
-    count: #{json_data["count"]} / 48279 (#{(json_data["count"] / 48279.0 * 10000).round / 100.0}%)
-    =========================================================
+=========================================================
+#{$account_num}つ目のfoursquare (apikey: #{$client_secret})の回数上限に達しました。
+lat: #{lat}
+lng: #{lng}
+response_code: #{response_code}
+response_body: #{response_body}
+errorが起きたapi: #{error_api}
+保存したレストランの件数: #{get_restaurants_num}
+DBのレストランの件数: #{Restaurant.count}
+lat: #{lat}
+lng: #{lng}
+count: #{json_data["count"]} / 48279 (#{(json_data["count"] / 48279.0 * 10000).round / 100.0}%)
+=========================================================
         EOC
 
         puts info
@@ -175,22 +175,29 @@ class CrawlingController < ApplicationController
       elsif response_code != 200
         info = <<-EOC
 
-    =========================================================
-    foursquareからエラーが返ってきました。
-    処理は続行しています。
-    lat: #{lat}
-    lng: #{lng}
-    count: #{json_data["count"]} / 48279 (#{(json_data["count"] / 48279.0 * 10000).round / 100.0}%)
-    DBのレストランの件数: #{Restaurant.count}
-    一番最後に保存したレストラン: #{Restaurant.last.attributes}
-    response_code: #{response_code}
-    response_body: #{response_body}
-    errorが起きたapi: #{error_api}
-    =========================================================
+=========================================================
+foursquareからエラーが返ってきました。
+処理は続行しています。
+lat: #{lat}
+lng: #{lng}
+count: #{json_data["count"]} / 48279 (#{(json_data["count"] / 48279.0 * 10000).round / 100.0}%)
+DBのレストランの件数: #{Restaurant.count}
+一番最後に保存したレストラン: #{Restaurant.last.attributes}
+response_code: #{response_code}
+response_body: #{response_body}
+errorが起きたapi: #{error_api}
+=========================================================
         EOC
 
         puts info
         slack_notify info
+        $error_count += 1
+        if $error_count > 3
+          return finishing_processing lat, lng, json_data["count"] unless $account_num < $crawling_ids.length
+          $account_num += 1
+          $client_id = $crawling_ids[$account_num-1]
+          $client_secret = $crawling_secrets[$account_num-1]
+        end
       else
         puts <<-EOC
 
@@ -199,43 +206,44 @@ class CrawlingController < ApplicationController
     lng: #{lng}
     count: #{json_data["count"]} (#{(json_data["count"] / 48279.0 * 10000).round / 100.0}%)
         EOC
-      end
-      south_end = 35.582135
-      east_end = 139.811738
-      lat_step = 0.00090128  # 100m
-      lng_step = 0.00055278  # 50m
-      initial_lat = 35.745434
 
-      if lat < south_end
-        if lng > east_end
-          return complete_processing(lat, lng, json_data["count"])
-        end
+        south_end = 35.582135
+        east_end = 139.811738
+        lat_step = 0.00090128  # 100m
+        lng_step = 0.00055278  # 50m
+        initial_lat = 35.745434
 
-        puts <<-EOC
+        if lat < south_end
+          if lng > east_end
+            return complete_processing(lat, lng, json_data["count"])
+          end
 
-    =========================================================
-    改行します
-    lat: #{lat}
-    lng: #{lng}
-    count: #{json_data["count"]} / 48279 (#{(json_data["count"] / 48279.0 * 10000).round / 100.0}%)
+          puts <<-EOC
 
-    DBのレストランの件数: #{Restaurant.count}
-    =========================================================
-        EOC
-        json_data["lng"] += lng_step
-        json_data["line_num"] += 1
-        if json_data["line_num"].odd?
-          json_data["lat"] = initial_lat
+  =========================================================
+  改行します
+  lat: #{lat}
+  lng: #{lng}
+  count: #{json_data["count"]} / 48279 (#{(json_data["count"] / 48279.0 * 10000).round / 100.0}%)
+
+  DBのレストランの件数: #{Restaurant.count}
+  =========================================================
+          EOC
+          json_data["lng"] += lng_step
+          json_data["line_num"] += 1
+          if json_data["line_num"].odd?
+            json_data["lat"] = initial_lat
+          else
+            json_data["lat"] = initial_lat - lat_step / 2
+          end
         else
-          json_data["lat"] = initial_lat - lat_step / 2
+          json_data["lat"] -= lat_step
         end
-      else
-        json_data["lat"] -= lat_step
-      end
 
-      json_data["count"] += 1
-      open(json_file_path, 'w') do |io|
-        JSON.dump(json_data, io)
+        json_data["count"] += 1
+        open(json_file_path, 'w') do |io|
+          JSON.dump(json_data, io)
+        end
       end
 
       sleep rand 10
