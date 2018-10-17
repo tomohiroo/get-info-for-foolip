@@ -1,3 +1,3 @@
 Rails.application.routes.draw do
-  root to: 'crawling#foursquare'
+  post '/get_restaurants', to: 'crawling#foursquare'
 end
