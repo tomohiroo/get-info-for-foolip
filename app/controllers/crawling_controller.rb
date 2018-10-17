@@ -4,16 +4,15 @@ require 'open-uri'
 class CrawlingController < ApplicationController
 
   def foursquare
-    log = Logger.new '/home/tomohiroo/pecopeco/shared/log/crawling.log'
     msg = 'クローリングを開始します。'
     slack_notify msg
-    log.info msg
+    puts msg
     $account_num = 1
     $crawling_ids = ENV['crawling_ids'].split(',')
     $crawling_secrets = ENV['crawling_secrets'].split(',')
     $client_id = $crawling_ids[$account_num-1]
     $client_secret = $crawling_secrets[$account_num-1]
-    main log
+    main
   end
 
   DOMAIN = "https://api.foursquare.com/v2"
@@ -56,7 +55,7 @@ class CrawlingController < ApplicationController
           if venue["id"].blank?
             slack_notify "errorが起きました。"
             slack_notify venue
-            log.info venue
+            puts venue
           end
           new_restaurant, category, pictures, station = Restaurant.build_with_foursquare_hash venue
           detail = new_restaurant.attributes
@@ -84,7 +83,7 @@ class CrawlingController < ApplicationController
       return 200, nil, new_restaurants_foursquare_ids.length, ''
     end
 
-    def finishing_processing log, lat, lng, count
+    def finishing_processing lat, lng, count
       info = <<-EOC
 
     ==============================================================
@@ -97,11 +96,11 @@ class CrawlingController < ApplicationController
     DBのレストランの件数: #{Restaurant.count}
     ==============================================================
       EOC
-      log.info info
+      puts info
       slack_notify info
     end
 
-    def complete_processing log, lat, lng, count
+    def complete_processing lat, lng, count
       info = <<-EOC
 
     ==============================================================
@@ -114,7 +113,7 @@ class CrawlingController < ApplicationController
     DBのレストランの件数: #{Restaurant.count}
     ==============================================================
       EOC
-      log.info info
+      puts info
       slack_notify info
     end
 
@@ -129,7 +128,7 @@ class CrawlingController < ApplicationController
       })
     end
 
-    def main log
+    def main
       json_file_path = Rails.root.join "public/crawling.json"
       json_data = File.open(json_file_path) { |j| JSON.load j }
       lat = json_data["lat"]
@@ -163,9 +162,9 @@ class CrawlingController < ApplicationController
     =========================================================
         EOC
 
-        log.info info
+        puts info
         slack_notify info
-        return finishing_processing log, lat, lng, json_data["count"] unless $account_num < $crawling_ids.length
+        return finishing_processing lat, lng, json_data["count"] unless $account_num < $crawling_ids.length
         $account_num += 1
         $client_id = $crawling_ids[$account_num-1]
         $client_secret = $crawling_secrets[$account_num-1]
@@ -186,10 +185,10 @@ class CrawlingController < ApplicationController
     =========================================================
         EOC
 
-        log.info info
+        puts info
         slack_notify info
       else
-        log.info <<-EOC
+        puts <<-EOC
 
     保存したレストランの件数: #{get_restaurants_num}
     lat: #{lat}
@@ -205,7 +204,7 @@ class CrawlingController < ApplicationController
 
       if lat < south_end
         if lng > east_end
-          return complete_processing(log, lat, lng, json_data["count"])
+          return complete_processing(lat, lng, json_data["count"])
         end
 
         info = <<-EOC
@@ -220,7 +219,7 @@ class CrawlingController < ApplicationController
     =========================================================
         EOC
 
-        log.info info
+        puts info
         slack_notify info
 
         json_data["lng"] += lng_step
@@ -240,8 +239,8 @@ class CrawlingController < ApplicationController
       end
 
       sleep rand 10
-      return finishing_processing log, json_data["lat"], json_data["lng"], json_data["count"]
-      main log
+      return finishing_processing json_data["lat"], json_data["lng"], json_data["count"]
+      main
     end
 
 end
