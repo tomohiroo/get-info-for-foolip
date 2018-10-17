@@ -5,14 +5,16 @@ class CrawlingController < ApplicationController
 
   def foursquare
     Thread.start do
+      json_file_path = Rails.root.join "public/crawling.json"
+      json_data = File.open(json_file_path) { |j| JSON.load j }
       msg = <<-EOC
 
 ==============================================================
 クローリングを開始します
-lat: #{lat}
-lng: #{lng}
+lat: #{json_data["lat"]}
+lng: #{json_data["lng"]}
 count: #{count} / 48279 (#{(count / 48279.0 * 10000).round / 100.0}%)
-Google Maps: "https://www.google.co.jp/maps/search/#{lat},#{lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
+Google Maps: "https://www.google.co.jp/maps/search/#{json_data["lat"]},#{json_data["lng"]}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
 
 DBのレストランの件数: #{Restaurant.count}
 ==============================================================
@@ -234,14 +236,14 @@ errorが起きたapi: #{error_api}
 
           puts <<-EOC
 
-  =========================================================
-  改行します
-  lat: #{lat}
-  lng: #{lng}
-  count: #{json_data["count"]} / 48279 (#{(json_data["count"] / 48279.0 * 10000).round / 100.0}%)
+=========================================================
+改行します
+lat: #{lat}
+lng: #{lng}
+count: #{json_data["count"]} / 48279 (#{(json_data["count"] / 48279.0 * 10000).round / 100.0}%)
 
-  DBのレストランの件数: #{Restaurant.count}
-  =========================================================
+DBのレストランの件数: #{Restaurant.count}
+=========================================================
           EOC
           json_data["lng"] += lng_step
           json_data["line_num"] += 1
