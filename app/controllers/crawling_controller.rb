@@ -13,6 +13,7 @@ class CrawlingController < ApplicationController
       $crawling_secrets = ENV['crawling_secrets'].split(',')
       $client_id = $crawling_ids[$account_num-1]
       $client_secret = $crawling_secrets[$account_num-1]
+      $error_count = 0
       main
     end
     render status: 402, json: { status: 402, message: 'Accepted' }
