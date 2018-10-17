@@ -7,6 +7,7 @@ class CrawlingController < ApplicationController
     Thread.start do
       json_file_path = Rails.root.join "public/crawling.json"
       json_data = File.open(json_file_path) { |j| JSON.load j }
+      $restaurant_number = Restaurant.count
       msg = <<-EOC
 
 ==============================================================
@@ -16,7 +17,7 @@ lng: #{json_data["lng"]}
 count: #{json_data["count"]} / 48279 (#{(json_data["count"] / 48279.0 * 10000).round / 100.0}%)
 Google Maps: "https://www.google.co.jp/maps/search/#{json_data["lat"]},#{json_data["lng"]}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
 
-DBのレストランの件数: #{Restaurant.count}
+DBのレストランの件数: #{$restaurant_number}
 ==============================================================
       EOC
 
@@ -111,7 +112,8 @@ lng: #{lng}
 count: #{count} / 48279 (#{(count / 48279.0 * 10000).round / 100.0}%)
 Google Maps: "https://www.google.co.jp/maps/search/#{lat},#{lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
 
-DBのレストランの件数: #{Restaurant.count}
+DBのレストランの件数: #{Restaurant.count}件
+保存したレストランの件数: #{Restaurant.count - $restaurant_number}件
 ==============================================================
       EOC
       puts info
