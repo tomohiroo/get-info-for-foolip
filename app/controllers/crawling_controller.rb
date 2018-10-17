@@ -4,15 +4,18 @@ require 'open-uri'
 class CrawlingController < ApplicationController
 
   def foursquare
-    msg = 'クローリングを開始します。'
-    slack_notify msg
-    puts msg
-    $account_num = 1
-    $crawling_ids = ENV['crawling_ids'].split(',')
-    $crawling_secrets = ENV['crawling_secrets'].split(',')
-    $client_id = $crawling_ids[$account_num-1]
-    $client_secret = $crawling_secrets[$account_num-1]
-    main
+    env["rack_after_reply.callbacks"] << lambda {
+      msg = 'クローリングを開始します。'
+      slack_notify msg
+      puts msg
+      $account_num = 1
+      $crawling_ids = ENV['crawling_ids'].split(',')
+      $crawling_secrets = ENV['crawling_secrets'].split(',')
+      $client_id = $crawling_ids[$account_num-1]
+      $client_secret = $crawling_secrets[$account_num-1]
+      main
+    }
+    format.html { render status: :accepted }
   end
 
   DOMAIN = "https://api.foursquare.com/v2"

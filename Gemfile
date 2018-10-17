@@ -29,6 +29,7 @@ gem "typhoeus"
 gem 'seed-fu'
 gem 'geokit-rails'
 gem "slack-notifier"
+gem "rack_after_reply"
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
