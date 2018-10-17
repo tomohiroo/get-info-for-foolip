@@ -15,7 +15,7 @@
 # Foreign Keys
 #
 #  fk_rails_...  (user_id => users.id)
-#
+
 
 class Board < ApplicationRecord
   belongs_to :user
