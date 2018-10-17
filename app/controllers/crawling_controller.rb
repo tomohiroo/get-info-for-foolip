@@ -5,7 +5,19 @@ class CrawlingController < ApplicationController
 
   def foursquare
     Thread.start do
-      msg = 'クローリングを開始します。'
+      msg = <<-EOC
+
+==============================================================
+クローリングを開始します
+lat: #{lat}
+lng: #{lng}
+count: #{count} / 48279 (#{(count / 48279.0 * 10000).round / 100.0}%)
+Google Maps: "https://www.google.co.jp/maps/search/#{lat},#{lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
+
+DBのレストランの件数: #{Restaurant.count}
+==============================================================
+      EOC
+
       slack_notify msg
       puts msg
       $account_num = 1
@@ -163,6 +175,7 @@ errorが起きたapi: #{error_api}
 DBのレストランの件数: #{Restaurant.count}
 lat: #{lat}
 lng: #{lng}
+Google Maps: "https://www.google.co.jp/maps/search/#{lat},#{lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
 count: #{json_data["count"]} / 48279 (#{(json_data["count"] / 48279.0 * 10000).round / 100.0}%)
 =========================================================
         EOC
