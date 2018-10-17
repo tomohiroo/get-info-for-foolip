@@ -4,7 +4,7 @@ require 'open-uri'
 class CrawlingController < ApplicationController
 
   def foursquare
-    env["rack_after_reply.callbacks"] << lambda {
+    Thread.start do
       msg = 'クローリングを開始します。'
       slack_notify msg
       puts msg
@@ -14,8 +14,8 @@ class CrawlingController < ApplicationController
       $client_id = $crawling_ids[$account_num-1]
       $client_secret = $crawling_secrets[$account_num-1]
       main
-    }
-    format.html { render status: :accepted }
+    end
+    render status: 402, json: { status: 402, message: 'Accepted' }
   end
 
   DOMAIN = "https://api.foursquare.com/v2"
