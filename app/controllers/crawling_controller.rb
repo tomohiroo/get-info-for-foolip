@@ -211,7 +211,7 @@ class CrawlingController < ApplicationController
           return complete_processing(lat, lng, json_data["count"])
         end
 
-        info = <<-EOC
+        puts <<-EOC
 
     =========================================================
     改行します
@@ -222,10 +222,6 @@ class CrawlingController < ApplicationController
     DBのレストランの件数: #{Restaurant.count}
     =========================================================
         EOC
-
-        puts info
-        slack_notify info
-
         json_data["lng"] += lng_step
         json_data["line_num"] += 1
         if json_data["line_num"].odd?
