@@ -239,7 +239,6 @@ class CrawlingController < ApplicationController
       end
 
       sleep rand 10
-      return finishing_processing json_data["lat"], json_data["lng"], json_data["count"]
       main
     end
 
