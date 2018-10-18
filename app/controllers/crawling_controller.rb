@@ -224,7 +224,7 @@ errorが起きたapi: #{error_api}
         slack_notify info
         $error_count += 1
         if $error_count > 3
-          return finishing_processing $count unless $account_num < $crawling_ids.length
+          return finishing_processing unless $account_num < $crawling_ids.length
           $account_num += 1
           $client_id = $crawling_ids[$account_num-1]
           $client_secret = $crawling_secrets[$account_num-1]
