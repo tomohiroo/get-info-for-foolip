@@ -120,15 +120,15 @@ DBのレストランの件数: #{$restaurant_number}
       end
     end
 
-    def finishing_processing lat, lng, count
+    def finishing_processing
       info = <<-EOC
 
 ==============================================================
 処理を終了します。
-lat: #{lat}
-lng: #{lng}
-count: #{count} / 48279 (#{(count / 48279.0 * 10000).round / 100.0}%)
-Google Maps: "https://www.google.co.jp/maps/search/#{lat},#{lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
+lat: #{$lat}
+lng: #{$lng}
+count: #{$count} / 48279 (#{($count / 48279.0 * 10000).round / 100.0}%)
+Google Maps: "https://www.google.co.jp/maps/search/#{$lat},#{$lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
 
 DBのレストランの件数: #{Restaurant.count}件
 保存したレストランの件数: #{Restaurant.count - $restaurant_number}件
@@ -138,16 +138,16 @@ DBのレストランの件数: #{Restaurant.count}件
       slack_notify info
     end
 
-    def complete_processing lat, lng, count
+    def complete_processing
       info = <<-EOC
 
 <!channel>
 ==============================================================
 領域内のクローリングが全て完了しました！！！。
-lat: #{lat}
-lng: #{lng}
-Google Maps: "https://www.google.co.jp/maps/search/#{lat},#{lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
-count: #{count} / 48279 (#{(count / 48279.0 * 10000).round / 100.0}%)
+lat: #{$lat}
+lng: #{$lng}
+Google Maps: "https://www.google.co.jp/maps/search/#{$lat},#{$lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
+count: #{$count} / 48279 (#{($count / 48279.0 * 10000).round / 100.0}%)
 
 DBのレストランの件数: #{Restaurant.count}
 ==============================================================
@@ -199,7 +199,7 @@ count: #{$count} / 48279 (#{($count / 48279.0 * 10000).round / 100.0}%)
 
         puts info
         slack_notify info
-        return finishing_processing $lat, $lng, $count unless $account_num < $crawling_ids.length
+        return finishing_processing unless $account_num < $crawling_ids.length
         $account_num += 1
         $client_id = $crawling_ids[$account_num-1]
         $client_secret = $crawling_secrets[$account_num-1]
@@ -224,7 +224,7 @@ errorが起きたapi: #{error_api}
         slack_notify info
         $error_count += 1
         if $error_count > 3
-          return finishing_processing lat, lng, $count unless $account_num < $crawling_ids.length
+          return finishing_processing $count unless $account_num < $crawling_ids.length
           $account_num += 1
           $client_id = $crawling_ids[$account_num-1]
           $client_secret = $crawling_secrets[$account_num-1]
@@ -246,7 +246,7 @@ errorが起きたapi: #{error_api}
 
         if $lat < south_end
           if $lng > east_end
-            return complete_processing($lat, $lng, $count)
+            return complete_processing
           end
 
           puts <<-EOC
