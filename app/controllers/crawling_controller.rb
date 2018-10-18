@@ -31,10 +31,10 @@ DBのレストランの件数: #{$restaurant_number}
   private
 
     def set_global_variable params
-      $lat = params[:lat]
-      $lng = params[:lng]
-      $line_num = params[:line_num]
-      $count = params[:count]
+      $lat = params[:lat].to_f
+      $lng = params[:lng].to_f
+      $line_num = params[:line_num].to_i
+      $count = params[:count].to_i
       $account_num = 1
       $crawling_ids = ENV['crawling_ids'].split(',')
       $crawling_secrets = ENV['crawling_secrets'].split(',')
