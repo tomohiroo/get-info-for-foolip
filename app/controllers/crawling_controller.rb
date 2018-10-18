@@ -113,10 +113,10 @@ DBのレストランの件数: #{$restaurant_number}
       conn.patch do |req|
         req.headers['Content-Type'] = 'application/json'
         req.headers['Authorization'] = "Bearer #{ENV["access_token"]}"
-        rep.params[:lat] = $lat
-        rep.params[:lng] = $lng
-        rep.params[:line_num] = $line_num
-        rep.params[:count] = $count
+        req.params[:lat] = $lat
+        req.params[:lng] = $lng
+        req.params[:line_num] = $line_num
+        req.params[:count] = $count
       end
     end
 
