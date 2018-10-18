@@ -5,17 +5,15 @@ class CrawlingController < ApplicationController
 
   def foursquare
     Thread.start do
-      json_file_path = Rails.root.join "public/crawling.json"
-      json_data = File.open(json_file_path) { |j| JSON.load j }
-      $restaurant_number = Restaurant.count
+      set_global_variable params
       msg = <<-EOC
 
 ==============================================================
 クローリングを開始します
-lat: #{json_data["lat"]}
-lng: #{json_data["lng"]}
-count: #{json_data["count"]} / 48279 (#{(json_data["count"] / 48279.0 * 10000).round / 100.0}%)
-Google Maps: "https://www.google.co.jp/maps/search/#{json_data["lat"]},#{json_data["lng"]}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
+lat: #{$lat}
+lng: #{$lng}
+count: #{$count} / 48279 ($count / 48279.0 * 10000).round / 100.0}%)
+Google Maps: "https://www.google.co.jp/maps/search/#{$lat},#{$lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
 
 DBのレストランの件数: #{$restaurant_number}
 ==============================================================
@@ -23,12 +21,6 @@ DBのレストランの件数: #{$restaurant_number}
 
       slack_notify msg
       puts msg
-      $account_num = 1
-      $crawling_ids = ENV['crawling_ids'].split(',')
-      $crawling_secrets = ENV['crawling_secrets'].split(',')
-      $client_id = $crawling_ids[$account_num-1]
-      $client_secret = $crawling_secrets[$account_num-1]
-      $error_count = 0
       main
     end
     render status: 402, json: { status: 402, message: 'Accepted' }
@@ -37,6 +29,20 @@ DBのレストランの件数: #{$restaurant_number}
   DOMAIN = "https://api.foursquare.com/v2"
 
   private
+
+    def set_global_variable params
+      $lat = params[:lat]
+      $lng = params[:lng]
+      $line_num = params[:line_num]
+      $count = params[:count]
+      $account_num = 1
+      $crawling_ids = ENV['crawling_ids'].split(',')
+      $crawling_secrets = ENV['crawling_secrets'].split(',')
+      $client_id = $crawling_ids[$account_num-1]
+      $client_secret = $crawling_secrets[$account_num-1]
+      $error_count = 0
+      $restaurant_number = Restaurant.count
+    end
 
     def search params
       conn = Faraday.new url: "#{DOMAIN}/venues/search"
@@ -102,15 +108,27 @@ DBのレストランの件数: #{$restaurant_number}
       return 200, nil, new_restaurants_foursquare_ids.length, ''
     end
 
-    def finishing_processing lat, lng, count
+    def update_params
+      conn = Faraday.new url: "https://foolip.net/crawling"
+      conn.patch do |req|
+        req.headers['Content-Type'] = 'application/json'
+        req.headers['Authorization'] = "Bearer #{ENV["access_token"]}"
+        rep.params[:lat] = $lat
+        rep.params[:lng] = $lng
+        rep.params[:line_num] = $line_num
+        rep.params[:count] = $count
+      end
+    end
+
+    def finishing_processing
       info = <<-EOC
 
 ==============================================================
 処理を終了します。
-lat: #{lat}
-lng: #{lng}
-count: #{count} / 48279 (#{(count / 48279.0 * 10000).round / 100.0}%)
-Google Maps: "https://www.google.co.jp/maps/search/#{lat},#{lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
+lat: #{$lat}
+lng: #{$lng}
+count: #{$count} / 48279 (#{($count / 48279.0 * 10000).round / 100.0}%)
+Google Maps: "https://www.google.co.jp/maps/search/#{$lat},#{$lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
 
 DBのレストランの件数: #{Restaurant.count}件
 保存したレストランの件数: #{Restaurant.count - $restaurant_number}件
@@ -120,16 +138,16 @@ DBのレストランの件数: #{Restaurant.count}件
       slack_notify info
     end
 
-    def complete_processing lat, lng, count
+    def complete_processing
       info = <<-EOC
 
 <!channel>
 ==============================================================
 領域内のクローリングが全て完了しました！！！。
-lat: #{lat}
-lng: #{lng}
-Google Maps: "https://www.google.co.jp/maps/search/#{lat},#{lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
-count: #{count} / 48279 (#{(count / 48279.0 * 10000).round / 100.0}%)
+lat: #{$lat}
+lng: #{$lng}
+Google Maps: "https://www.google.co.jp/maps/search/#{$lat},#{$lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
+count: #{$count} / 48279 (#{($count / 48279.0 * 10000).round / 100.0}%)
 
 DBのレストランの件数: #{Restaurant.count}
 ==============================================================
@@ -150,14 +168,9 @@ DBのレストランの件数: #{Restaurant.count}
     end
 
     def main
-      json_file_path = Rails.root.join "public/crawling.json"
-      json_data = File.open(json_file_path) { |j| JSON.load j }
-      lat = json_data["lat"]
-      lng = json_data["lng"]
-
       restaurant_category_id = '4d4b7105d754a06374d81259,4bf58dd8d48988d116941735'
       params = {
-        ll: "#{lat},#{lng}",
+        ll: "#{$lat},#{$lng}",
         limit: 50,
         radius: 50,
         categoryId: "#{restaurant_category_id}"
@@ -170,23 +183,23 @@ DBのレストランの件数: #{Restaurant.count}
 
 =========================================================
 #{$account_num}つ目のfoursquare (apikey: #{$client_secret})の回数上限に達しました。
-lat: #{lat}
-lng: #{lng}
+lat: #{$lat}
+lng: #{$lng}
 response_code: #{response_code}
 response_body: #{response_body}
 errorが起きたapi: #{error_api}
 保存したレストランの件数: #{get_restaurants_num}
 DBのレストランの件数: #{Restaurant.count}
-lat: #{lat}
-lng: #{lng}
-Google Maps: "https://www.google.co.jp/maps/search/#{lat},#{lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
-count: #{json_data["count"]} / 48279 (#{(json_data["count"] / 48279.0 * 10000).round / 100.0}%)
+lat: #{$lat}
+lng: #{$lng}
+Google Maps: "https://www.google.co.jp/maps/search/#{$lat},#{$lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ"
+count: #{$count} / 48279 (#{($count / 48279.0 * 10000).round / 100.0}%)
 =========================================================
         EOC
 
         puts info
         slack_notify info
-        return finishing_processing lat, lng, json_data["count"] unless $account_num < $crawling_ids.length
+        return finishing_processing unless $account_num < $crawling_ids.length
         $account_num += 1
         $client_id = $crawling_ids[$account_num-1]
         $client_secret = $crawling_secrets[$account_num-1]
@@ -196,9 +209,9 @@ count: #{json_data["count"]} / 48279 (#{(json_data["count"] / 48279.0 * 10000).r
 =========================================================
 foursquareからエラーが返ってきました。
 処理は続行しています。
-lat: #{lat}
-lng: #{lng}
-count: #{json_data["count"]} / 48279 (#{(json_data["count"] / 48279.0 * 10000).round / 100.0}%)
+lat: #{$lat}
+lng: #{$lng}
+count: #{$count} / 48279 (#{($count / 48279.0 * 10000).round / 100.0}%)
 DBのレストランの件数: #{Restaurant.count}
 一番最後に保存したレストラン: #{Restaurant.last.attributes}
 response_code: #{response_code}
@@ -211,7 +224,7 @@ errorが起きたapi: #{error_api}
         slack_notify info
         $error_count += 1
         if $error_count > 3
-          return finishing_processing lat, lng, json_data["count"] unless $account_num < $crawling_ids.length
+          return finishing_processing unless $account_num < $crawling_ids.length
           $account_num += 1
           $client_id = $crawling_ids[$account_num-1]
           $client_secret = $crawling_secrets[$account_num-1]
@@ -220,9 +233,9 @@ errorが起きたapi: #{error_api}
         puts <<-EOC
 
     保存したレストランの件数: #{get_restaurants_num}
-    lat: #{lat}
-    lng: #{lng}
-    count: #{json_data["count"]} (#{(json_data["count"] / 48279.0 * 10000).round / 100.0}%)
+    lat: #{$lat}
+    lng: #{$lng}
+    count: #{$count} (#{($count / 48279.0 * 10000).round / 100.0}%)
         EOC
 
         south_end = 35.582135
@@ -231,37 +244,35 @@ errorが起きたapi: #{error_api}
         lng_step = 0.00055278  # 50m
         initial_lat = 35.745434
 
-        if lat < south_end
-          if lng > east_end
-            return complete_processing(lat, lng, json_data["count"])
+        if $lat < south_end
+          if $lng > east_end
+            return complete_processing
           end
 
           puts <<-EOC
 
 =========================================================
 改行します
-lat: #{lat}
-lng: #{lng}
-count: #{json_data["count"]} / 48279 (#{(json_data["count"] / 48279.0 * 10000).round / 100.0}%)
+lat: #{$lat}
+lng: #{$lng}
+count: #{$count} / 48279 (#{($count / 48279.0 * 10000).round / 100.0}%)
 
 DBのレストランの件数: #{Restaurant.count}
 =========================================================
           EOC
-          json_data["lng"] += lng_step
-          json_data["line_num"] += 1
-          if json_data["line_num"].odd?
-            json_data["lat"] = initial_lat
+          $lng += lng_step
+          $line_num += 1
+          if $line_num.odd?
+            $lat = initial_lat
           else
-            json_data["lat"] = initial_lat - lat_step / 2
+            $lat = initial_lat - lat_step / 2
           end
         else
-          json_data["lat"] -= lat_step
+          $lat -= lat_step
         end
 
-        json_data["count"] += 1
-        open(json_file_path, 'w') do |io|
-          JSON.dump(json_data, io)
-        end
+        $count += 1
+        update_params
       end
 
       sleep rand 10
