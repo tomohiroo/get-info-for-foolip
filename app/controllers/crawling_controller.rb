@@ -12,7 +12,7 @@ class CrawlingController < ApplicationController
 クローリングを開始します
 lat: #{$lat}
 lng: #{$lng}
-count: #{$count} / 48279 (#{$count} / 48279.0 * 10000).round / 100.0}%)
+count: #{$count} / 48279 (#{$count / 48279.0 * 10000).round / 100.0}%)
 Google Maps: https://www.google.co.jp/maps/search/#{$lat},#{$lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ
 
 DBのレストランの件数: #{$restaurant_number}
