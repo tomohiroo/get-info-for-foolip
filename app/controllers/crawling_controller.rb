@@ -76,9 +76,8 @@ DBのレストランの件数: #{$restaurant_number}
         request.on_complete do |response|
           status = JSON.parse(response.body)["meta"]["code"]
           return status if status == 429
-          puts JSON.parse(response.body)["response"]["venue"]
           venue = JSON.parse(response.body)["response"]["venue"]
-          if venue["id"].blank?
+          if venue.blank? || venue["id"].blank?
             slack_notify "errorが起きました。"
             slack_notify venue
             puts venue
