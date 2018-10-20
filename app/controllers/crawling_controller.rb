@@ -35,9 +35,11 @@ DBのレストランの件数: #{$restaurant_number}
       $line_num = params[:line_num].to_i
       $count = params[:count].to_i
       $account_num = 1
+      $crawling_ids = []
+      $crawling_secrets = []
       ENV['crawling_ids'].split(',').shuffle.each do |ids|
-        $crawling_ids = ids.split(';')[0]
-        $crawling_secrets = ids.split(';')[1]
+        $crawling_ids.push ids.split(';')[0]
+        $crawling_secrets.push ids.split(';')[1]
       end
       $client_id = $crawling_ids[$account_num-1]
       $client_secret = $crawling_secrets[$account_num-1]
