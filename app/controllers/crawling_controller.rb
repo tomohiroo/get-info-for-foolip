@@ -38,7 +38,7 @@ DBのレストランの件数: #{$restaurant_number}
       $crawling_ids = []
       $crawling_secrets = []
       ENV['crawling_ids'].split(',').shuffle.each do |ids|
-        $crawling_ids.push ids.split(';')[0]
+        $crawling_ids.push ids.split(':')[0]
         $crawling_secrets.push ids.split(';')[1]
       end
       $client_id = $crawling_ids[$account_num-1]
