@@ -9,6 +9,7 @@ class CrawlingController < ApplicationController
 
 ==============================================================
 クローリングを開始します
+ip: #{Faraday.new(url: "https://jsonip.com/").get.body}
 lat: #{$lat}
 lng: #{$lng}
 count: #{$count} / 48279 #{($count / 48279.0 * 10000).round / 100.0}%)
@@ -128,6 +129,7 @@ DBのレストランの件数: #{$restaurant_number}
 
 ==============================================================
 処理を終了します。
+ip: #{Faraday.new(url: "https://jsonip.com/").get.body}
 lat: #{$lat}
 lng: #{$lng}
 count: #{$count} / 48279 (#{($count / 48279.0 * 10000).round / 100.0}%)
@@ -186,6 +188,7 @@ DBのレストランの件数: #{Restaurant.count}
 
 =========================================================
 #{$account_num}つ目のfoursquare (apikey: #{$client_secret})の回数上限に達しました。
+ip: #{Faraday.new(url: "https://jsonip.com/").get.body}
 lat: #{$lat}
 lng: #{$lng}
 response_code: #{response_code}
