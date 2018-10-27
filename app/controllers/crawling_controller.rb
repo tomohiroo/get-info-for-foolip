@@ -65,37 +65,30 @@ DBのレストランの件数: #{$restaurant_number}
 
     def get_details ids
       restaurant_hashes = []
-      hydra = Typhoeus::Hydra.new
       ids.each do |id|
-        request = Typhoeus::Request.new(
-          "#{DOMAIN}/venues/#{id}",
-          followlocation: true,
-          params: {
-            client_id: $client_id,
-            client_secret: $client_secret,
-            v: ENV['foursquare_version'],
-            locale: "ja"
-          }
-        )
-        request.on_complete do |response|
-          status = JSON.parse(response.body)["meta"]["code"]
-          return status if status == 429
-          venue = JSON.parse(response.body)["response"]["venue"]
-          if venue.blank? || venue["id"].blank?
-            msg = "venueがnilのerrorが起きました。venue: #{venue}\nresponse_code: #{status}\nbody: #{JSON.parse(response.body)}\n\nresponse: #{response}"
-            slack_notify "<!tomohiro ueda>\n#{msg}"
-            puts msg
-          end
-          new_restaurant, category, pictures, station = Restaurant.build_with_foursquare_hash venue
-          detail = new_restaurant.attributes
-          detail[:category] = category
-          detail[:pictures] = pictures
-          detail[:station] = station
-          restaurant_hashes << { restaurant: new_restaurant, detail: detail }
+        conn = Faraday.new url: "#{DOMAIN}/venues/#{id}"
+        response = conn.get do |req|
+          req.params[:client_id] = $client_id
+          req.params[:client_secret] = $client_secret
+          req.params[:v] = ENV['foursquare_version']
+          req.params[:locale] = "ja"
         end
-        hydra.queue(request)
+        status = JSON.parse(response.body)["meta"]["code"]
+        return status if status == 429
+        venue = JSON.parse(response.body)["response"]["venue"]
+        if venue.blank? || venue["id"].blank?
+          msg = "venueがnilのerrorが起きました。venue: #{venue}\nresponse_code: #{status}\nbody: #{JSON.parse(response.body)}\n\nresponse: #{response}"
+          slack_notify "<!tomohiro ueda>\n#{msg}"
+          puts msg
+        end
+        new_restaurant, category, pictures, station = Restaurant.build_with_foursquare_hash venue
+        detail = new_restaurant.attributes
+        detail[:category] = category
+        detail[:pictures] = pictures
+        detail[:station] = station
+        restaurant_hashes << { restaurant: new_restaurant, detail: detail }
+        sleep 3
       end
-      hydra.run
       restaurant_hashes
     end
 
