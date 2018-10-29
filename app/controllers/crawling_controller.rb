@@ -9,7 +9,7 @@ class CrawlingController < ApplicationController
 
 ==============================================================
 クローリングを開始します
-ip: #{Faraday.new(url: "https://jsonip.com/").get.body["ip"]}
+ip: #{JSON.parse(Faraday.new(url: 'https://jsonip.com').get.body)["ip"]}
 lat: #{$lat}
 lng: #{$lng}
 count: #{$count} / 48279 (#{($count / 48279.0 * 10000).round / 100.0}%)
