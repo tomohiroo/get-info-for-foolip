@@ -9,10 +9,10 @@ class CrawlingController < ApplicationController
 
 ==============================================================
 クローリングを開始します
-ip: #{Faraday.new(url: "https://jsonip.com/").get.body}
+ip: #{Faraday.new(url: "https://jsonip.com/").get.body["ip"]}
 lat: #{$lat}
 lng: #{$lng}
-count: #{$count} / 48279 #{($count / 48279.0 * 10000).round / 100.0}%)
+count: #{$count} / 48279 (#{($count / 48279.0 * 10000).round / 100.0}%)
 Google Maps: https://www.google.co.jp/maps/search/#{$lat},#{$lng}?sa=X&ved=2ahUKEwjvx7jJq4LeAhUIIIgKHSD-CTsQ8gEwAHoECAAQAQ
 
 DBのレストランの件数: #{$restaurant_number}
@@ -78,7 +78,7 @@ DBのレストランの件数: #{$restaurant_number}
         venue = JSON.parse(response.body)["response"]["venue"]
         if venue.blank? || venue["id"].blank?
           msg = "venueがnilのerrorが起きました。venue: #{venue}\nresponse_code: #{status}\nbody: #{JSON.parse(response.body)}\n\nresponse: #{response}"
-          slack_notify "<!tomohiro ueda>\n#{msg}"
+          slack_notify "<!tomohiro_ueda>\n#{msg}"
           puts msg
         end
         new_restaurant, category, pictures, station = Restaurant.build_with_foursquare_hash venue
