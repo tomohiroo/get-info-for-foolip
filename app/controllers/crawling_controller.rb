@@ -11,7 +11,6 @@ class CrawlingController < ApplicationController
       set_global_variable params
       msg = <<-EOC
 
-==============================================================
 クローリングを開始します
 ip: #{get_ip}
 lat: #{$lat}
@@ -20,7 +19,6 @@ count: #{$count} / 48279 (#{($count / 48279.0 * 10000).round / 100.0}%)
 Google Maps: https://www.google.co.jp/maps/search/#{$lat},#{$lng}
 
 DBのレストランの件数: #{$restaurant_number}
-==============================================================
       EOC
 
       slack_notify msg
@@ -124,7 +122,6 @@ DBのレストランの件数: #{$restaurant_number}
     def finishing_processing
       info = <<-EOC
 
-==============================================================
 処理を終了します。
 ip: #{get_ip}
 lat: #{$lat}
@@ -134,7 +131,6 @@ Google Maps: https://www.google.co.jp/maps/search/#{$lat},#{$lng}
 
 DBのレストランの件数: #{Restaurant.count}件
 保存したレストランの件数: #{Restaurant.count - $restaurant_number}件
-==============================================================
       EOC
       puts info
       slack_notify info
@@ -144,15 +140,12 @@ DBのレストランの件数: #{Restaurant.count}件
       info = <<-EOC
 
 <!channel>
-==============================================================
 領域内のクローリングが全て完了しました！！！。
 lat: #{$lat}
 lng: #{$lng}
 Google Maps: https://www.google.co.jp/maps/search/#{$lat},#{$lng}
 count: #{$count} / 48279 (#{($count / 48279.0 * 10000).round / 100.0}%)
-
 DBのレストランの件数: #{Restaurant.count}
-==============================================================
       EOC
       puts info
       slack_notify info
@@ -183,7 +176,6 @@ DBのレストランの件数: #{Restaurant.count}
       if response_code == 429
         info = <<-EOC
 
-=========================================================
 #{$account_num}つ目のfoursquare (apikey: #{$client_secret})の回数上限に達しました。
 ip: #{get_ip}
 lat: #{$lat}
@@ -197,7 +189,6 @@ lat: #{$lat}
 lng: #{$lng}
 Google Maps: https://www.google.co.jp/maps/search/#{$lat},#{$lng}
 count: #{$count} / 48279 (#{($count / 48279.0 * 10000).round / 100.0}%)
-=========================================================
         EOC
 
         puts info
@@ -209,7 +200,6 @@ count: #{$count} / 48279 (#{($count / 48279.0 * 10000).round / 100.0}%)
       elsif response_code != 200
         info = <<-EOC
 
-=========================================================
 foursquareからエラーが返ってきました。
 処理は続行しています。
 lat: #{$lat}
@@ -221,7 +211,6 @@ DBのレストランの件数: #{Restaurant.count}
 response_code: #{response_code}
 response_body: #{response_body}
 errorが起きたapi: #{error_api}
-=========================================================
         EOC
 
         puts info
@@ -234,14 +223,7 @@ errorが起きたapi: #{error_api}
           $client_secret = $crawling_secrets[$account_num-1]
         end
       else
-        puts <<-EOC
-
-    保存したレストランの件数: #{get_restaurants_num}
-    lat: #{$lat}
-    lng: #{$lng}
-    count: #{$count} (#{($count / 48279.0 * 10000).round / 100.0}%)
-        EOC
-
+        puts " 保存したレストランの件数: #{get_restaurants_num}, lat: #{$lat}, lng: #{$lng}, count: #{$count} (#{($count / 48279.0 * 10000).round / 100.0}%)"
         south_end = 35.582135
         east_end = 139.811738
         lat_step = 0.00090128  # 100m
@@ -255,14 +237,12 @@ errorが起きたapi: #{error_api}
 
           puts <<-EOC
 
-=========================================================
 改行します
 lat: #{$lat}
 lng: #{$lng}
 count: #{$count} / 48279 (#{($count / 48279.0 * 10000).round / 100.0}%)
 
 DBのレストランの件数: #{Restaurant.count}
-=========================================================
           EOC
           $lng += lng_step
           $line_num += 1
