@@ -85,7 +85,7 @@ class Restaurant < ApplicationRecord
       new_restaurant.rating = venue["rating"] / 2 if venue["rating"]
       new_restaurant.price = venue["price"]["tier"] if venue["price"] && venue["price"]["tier"]
       new_restaurant.category = Category.build_with_foursquare_hash venue["categories"][0] if venue["categories"][0]
-      new_restaurant.restaurant_pictures = RestaurantPicture.build_with_foursquare_hash venue["photos"] unless venue["photos"]["count"] == 0
+      new_restaurant.restaurant_pictures = RestaurantPicture.build_with_foursquare_hash venue["photos"] if venue["photos"]["count"] > 0
       new_restaurant.station = Station.closest(origin: [new_restaurant.lat, new_restaurant.lng])[0]
       return new_restaurant, new_restaurant.category, new_restaurant.restaurant_pictures, new_restaurant.station
     end

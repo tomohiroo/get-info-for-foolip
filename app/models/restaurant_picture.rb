@@ -27,7 +27,6 @@ class RestaurantPicture < ApplicationRecord
   validates :restaurant_id, presence: true
 
   def self.build_with_foursquare_hash(hash)
-    puts hash
     items = hash['groups'][1]['items']
     items.map do |item|
       RestaurantPicture.new(
