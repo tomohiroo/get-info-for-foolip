@@ -1,0 +1,17 @@
+Layout/IndentationConsistency:
+  EnforcedStyle: rails
+
+Style/Documentation:
+  Enabled: false
+
+Metrics/LineLength:
+  Enabled: false
+
+Style/AsciiComments:
+  Enabled: false
+
+Style/SymbolArray:
+  Enabled: false
+
+Style/GlobalVars:
+  Enabled: false

@@ -28,7 +28,7 @@ DBのレストランの件数: #{$restaurant_number}
     render status: 402, json: { status: 402, message: 'Accepted' }
   end
 
-  DOMAIN = "https://api.foursquare.com/v2"
+  DOMAIN = 'https://api.foursquare.com/v2'
 
   private
 
@@ -56,8 +56,8 @@ DBのレストランの件数: #{$restaurant_number}
         req.params[:client_id] = $client_id
         req.params[:client_secret] = $client_secret
         req.params[:v] = ENV['foursquare_version']
-        req.params[:locale] = "ja"
-        req.params[:intent] = "browse"
+        req.params[:locale] = 'ja'
+        req.params[:intent] = 'browse'
         req.params[:ll] = params[:ll]
         req.params[:limit] = params[:limit]
         req.params[:radius] = params[:radius]
@@ -75,10 +75,11 @@ DBのレストランの件数: #{$restaurant_number}
           req.params[:v] = ENV['foursquare_version']
           req.params[:locale] = "ja"
         end
-        status = JSON.parse(response.body)["meta"]["code"]
+        status = JSON.parse(response.body)['meta']['code']
         return status if status == 429
-        venue = JSON.parse(response.body)["response"]["venue"]
-        if venue.blank? || venue["id"].blank?
+
+        venue = JSON.parse(response.body)['response']['venue']
+        if venue.blank? || venue['id'].blank?
           msg = "venueがnilのerrorが起きました。venue: #{venue}\nresponse_code: #{status}\nbody: #{JSON.parse(response.body)}\n\nresponse: #{response}"
           slack_notify "<!tomohiro_ueda>\n#{msg}"
           puts msg
@@ -97,18 +98,21 @@ DBのレストランの件数: #{$restaurant_number}
     def get_restaurants params
       response = search params
       return response.status, response.body, 0, 'search api' if response.status != 200
-      foursquare_ids = JSON.parse(response.body)["response"]["venues"].map { |h| h["id"] }
+
+      foursquare_ids = JSON.parse(response.body)['response']['venues'].map { |h| h['id'] }
       return 200, nil, 0, '' if foursquare_ids.blank?
+
       db_foursquare_ids = Restaurant.where(foursquare_id: foursquare_ids).select(:foursquare_id).map(&:foursquare_id)
       new_restaurants_foursquare_ids = foursquare_ids.select { |id| db_foursquare_ids.exclude? id }
       new_restaurants_hash = get_details new_restaurants_foursquare_ids
       return 429, new_restaurants_hash, 0, 'detail api' if new_restaurants_hash == 429
+
       Restaurant.import new_restaurants_hash.map { |h| h[:restaurant] }, recursive: true, validate: false
       return 200, nil, new_restaurants_foursquare_ids.length, ''
     end
 
     def update_params
-      conn = Faraday.new url: "https://foolip.net/crawling"
+      conn = Faraday.new url: 'https://foolip.net/crawling'
       conn.patch do |req|
         req.headers['Content-Type'] = 'application/json'
         req.headers['Authorization'] = "Bearer #{ENV["access_token"]}"
@@ -156,10 +160,10 @@ DBのレストランの件数: #{Restaurant.count}
       notifier = Slack::Notifier.new slack_webhook_url do
         defaults username: "クローリングマン"
       end
-      notifier.post({
+      notifier.post(
         text: "```【#{Rails.env}】\n#{info}```",
         icon_url: 'https://t14.pimg.jp/030/224/824/1/30224824.jpg'
-      })
+      )
     end
 
     def main
@@ -218,6 +222,7 @@ errorが起きたapi: #{error_api}
         $error_count += 1
         if $error_count > 3
           return finishing_processing unless $account_num < $crawling_ids.length
+
           $account_num += 1
           $client_id = $crawling_ids[$account_num-1]
           $client_secret = $crawling_secrets[$account_num-1]
@@ -246,11 +251,7 @@ DBのレストランの件数: #{Restaurant.count}
           EOC
           $lng += lng_step
           $line_num += 1
-          if $line_num.odd?
-            $lat = initial_lat
-          else
-            $lat = initial_lat - lat_step / 2
-          end
+          $lat = $line_num.odd? ? initial_lat : initial_lat - lat_step / 2
         else
           $lat -= lat_step
         end
@@ -259,7 +260,7 @@ DBのレストランの件数: #{Restaurant.count}
         update_params
       end
 
-      sleep rand 10
+      sleep rand(10)
       main
     end
 

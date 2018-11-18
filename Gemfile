@@ -25,10 +25,12 @@ gem 'rack-cors'
 gem 'devise'
 gem 'faraday'
 gem 'activerecord-import'
-gem "typhoeus"
+gem 'typhoeus'
 gem 'seed-fu'
 gem 'geokit-rails'
-gem "slack-notifier"
+gem 'slack-notifier'
+gem 'nokogiri'
+gem 'mechanize'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -49,8 +51,8 @@ group :development do
   gem 'spring-commands-rspec'
   gem 'annotate'
   gem 'capistrano-bundler'
-  gem "capistrano", "~> 3.10", require: false
-  gem "capistrano-rails", "~> 1.4", require: false
+  gem 'capistrano', '~> 3.10', require: false
+  gem 'capistrano-rails', '~> 1.4', require: false
   gem 'capistrano-rbenv'
   gem 'capistrano3-unicorn'
 end
