@@ -81,7 +81,7 @@ class Restaurant < ApplicationRecord
     new_restaurant.foursquare_url = venue["canonicalUrl"] if venue["canonicalUrl"]
     new_restaurant.rating = venue["rating"] / 2 if venue["rating"]
     new_restaurant.price = venue["price"]["tier"] if venue["price"] && venue["price"]["tier"]
-    new_restaurant.get_tabelog_url
+    new_restaurant.tabelog_url = new_restaurant.get_tabelog_url
     new_restaurant.category = Category.build_with_foursquare_hash venue["categories"][0] if venue["categories"][0]
     new_restaurant.restaurant_pictures = RestaurantPicture.build_with_foursquare_hash venue["photos"] if venue["photos"]["count"].positive?
     new_restaurant.station = Station.closest(origin: [new_restaurant.lat, new_restaurant.lng])[0]
@@ -99,12 +99,12 @@ class Restaurant < ApplicationRecord
     page = agent.get "https://s.tabelog.com/smartphone/restaurant_list/list?utf8=%E2%9C%93&SrtT=rt&tid=&sk=#{name}&svd=20181118&svps=2&svt=1900&LstCos=0&LstCosT=0&LstRev=&LstSitu=0&LstSmoking=0&area_datatype=&area_id=&keyword_datatype=&keyword_id=&LstReserve=0&lat=#{lat}&lon=#{lng}&LstRange=A&lid=redo_search_form&additional_cond_flg=1"
     not_found_msgs = [page.at('#page-header > div.searchword'), page.at('#js-parent-of-floating-element > p')]
     if (not_found_msgs[0] && not_found_msgs[0].children[1]['class'] == 'rstname-notfound') || (not_found_msgs[1] && not_found_msgs[1].attributes['class'].value == 'not-found')
-      tabelog_url = ''
+      ''
     else
       uri = URI.parse(page.at('#js-parent-of-floating-element > div.rst-list-group-wrap.js-rst-list-group-wrap > section > div > a').attributes['href'].value)
       uri.host = 'tabelog.com' if uri.host == 's.tabelog.com'
       uri.query = nil
-      tabelog_url = uri.to_s
+      uri.to_s
     end
   end
 

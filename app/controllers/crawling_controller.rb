@@ -94,7 +94,6 @@ DBのレストランの件数: #{$restaurant_number}
       restaurant_hashes
     end
 
-
     def get_restaurants(params)
       response = search params
       return response.status, response.body, 0, 'search api' if response.status != 200
