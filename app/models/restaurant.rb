@@ -42,13 +42,12 @@ class Restaurant < ApplicationRecord
   validates :name, presence: true
   acts_as_mappable
 
-  def self.search params
+  def self.search(params)
     response = Foursquare.search params
     return response.status if response.status != 200
     restaurants = JSON.parse(response.body)["response"]["venues"]
     foursquare_ids = restaurants.map { |h| h["id"] }
-    in_db_restaurants = Restaurant.includes([:category, :restaurant_pictures, :station])
-      .where(foursquare_id: foursquare_ids)
+    in_db_restaurants = Restaurant.includes([:category, :restaurant_pictures, :station]).where(foursquare_id: foursquare_ids)
     in_db_restaurants_foursquare_ids = in_db_restaurants.map(&:foursquare_id)
     new_restaurants_foursquare_ids = foursquare_ids.select { |id| in_db_restaurants_foursquare_ids.exclude? id }
     new_restaurants_hash = Foursquare.get_details new_restaurants_foursquare_ids
@@ -57,20 +56,20 @@ class Restaurant < ApplicationRecord
     in_db_restaurants_details = in_db_restaurants.map(&:get_details_from_db)
     new_restaurants_details = new_restaurants_hash.map { |h| h[:detail] }
     results = in_db_restaurants_details.concat(new_restaurants_details)
-    results.sort { |a,b| foursquare_ids.index(a["foursquare_id"]) <=> foursquare_ids.index(b["foursquare_id"]) }
+    results.sort_by { |rst| foursquare_ids.index(rst["foursquare_id"]) }
   end
 
   def get_details_from_db
     details = attributes
     details[:category] = category if category
-    details[:pictures] = restaurant_pictures.sort { |a,b| a.id <=> b.id } if restaurant_pictures
+    details[:pictures] = restaurant_pictures.sort_by(&:id) if restaurant_pictures
     details[:station] = station
-    return details
+    details
   end
 
   private
 
-    def self.build_with_foursquare_hash venue
+    def self.build_with_foursquare_hash(venue)
       new_restaurant = Restaurant.new
       new_restaurant.foursquare_id = venue["id"]
       new_restaurant.name = venue["name"] if venue["name"]
