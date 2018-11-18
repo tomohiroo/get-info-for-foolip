@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'open-uri'
 class CrawlingController < ApplicationController
 
@@ -73,7 +72,7 @@ DBのレストランの件数: #{$restaurant_number}
           req.params[:client_id] = $client_id
           req.params[:client_secret] = $client_secret
           req.params[:v] = ENV['foursquare_version']
-          req.params[:locale] = "ja"
+          req.params[:locale] = 'ja'
         end
         status = JSON.parse(response.body)['meta']['code']
         return status if status == 429
@@ -95,7 +94,7 @@ DBのレストランの件数: #{$restaurant_number}
       restaurant_hashes
     end
 
-    def get_restaurants params
+    def get_restaurants(params)
       response = search params
       return response.status, response.body, 0, 'search api' if response.status != 200
 
@@ -115,7 +114,7 @@ DBのレストランの件数: #{$restaurant_number}
       conn = Faraday.new url: 'https://foolip.net/crawling'
       conn.patch do |req|
         req.headers['Content-Type'] = 'application/json'
-        req.headers['Authorization'] = "Bearer #{ENV["access_token"]}"
+        req.headers['Authorization'] = "Bearer #{ENV['access_token']}"
         req.params[:lat] = $lat
         req.params[:lng] = $lng
         req.params[:line_num] = $line_num
