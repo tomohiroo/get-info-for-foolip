@@ -32,7 +32,7 @@ DBのレストランの件数: #{$restaurant_number}
 
   private
 
-    def set_global_variable params
+    def set_global_variable(params)
       $lat = params[:lat].to_f
       $lng = params[:lng].to_f
       $line_num = params[:line_num].to_i
@@ -50,7 +50,7 @@ DBのレストランの件数: #{$restaurant_number}
       $restaurant_number = Restaurant.count
     end
 
-    def search params
+    def search(params)
       conn = Faraday.new url: "#{DOMAIN}/venues/search"
       conn.get do |req|
         req.params[:client_id] = $client_id
@@ -65,7 +65,7 @@ DBのレストランの件数: #{$restaurant_number}
       end
     end
 
-    def get_details ids
+    def get_details(ids)
       restaurant_hashes = []
       ids.each do |id|
         conn = Faraday.new url: "#{DOMAIN}/venues/#{id}"
