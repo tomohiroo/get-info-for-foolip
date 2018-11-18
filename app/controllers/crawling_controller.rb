@@ -79,9 +79,10 @@ DBのレストランの件数: #{$restaurant_number}
 
         venue = JSON.parse(response.body)['response']['venue']
         if venue.blank? || venue['id'].blank?
-          msg = "venueがnilのerrorが起きました。venue: #{venue}\nresponse_code: #{status}\nbody: #{JSON.parse(response.body)}\n\nresponse: #{response}"
-          slack_notify "<!tomohiro_ueda>\n#{msg}"
+          msg = "venueがnilのerrorが起きました。\nfoursquare_id: #{id}\nvenue: #{venue}\nresponse_code: #{status}\nbody: #{JSON.parse(response.body)}"
+          slack_notify msg
           puts msg
+          next
         end
         new_restaurant, category, pictures, station = Restaurant.build_with_foursquare_hash venue
         detail = new_restaurant.attributes
@@ -91,6 +92,7 @@ DBのレストランの件数: #{$restaurant_number}
         restaurant_hashes << { restaurant: new_restaurant, detail: detail }
         sleep 3
       end
+
       restaurant_hashes
     end
 

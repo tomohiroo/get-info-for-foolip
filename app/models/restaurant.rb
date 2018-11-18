@@ -69,21 +69,21 @@ class Restaurant < ApplicationRecord
 
   def self.build_with_foursquare_hash(venue)
     new_restaurant = Restaurant.new
-    new_restaurant.foursquare_id = venue["id"]
-    new_restaurant.name = venue["name"] if venue["name"]
-    new_restaurant.phone = "0#{venue["contact"]["phone"][3..-1]}" if venue["contact"]["phone"]
-    new_restaurant.twitter_id = venue["contact"]["twitter"] if venue["contact"]["twitter"]
-    new_restaurant.facebook_id = venue["contact"]["facebook"] if venue["contact"]["facebook"]
-    new_restaurant.instagram_id = venue["contact"]["instagram"] if venue["contact"]["instagram"]
-    new_restaurant.lat = venue["location"]["lat"]
-    new_restaurant.lng = venue["location"]["lng"]
-    new_restaurant.address = venue["location"]["formattedAddress"][0..-2].map { |a| a.split ', ' }.flatten.reverse.join(' ') if venue["location"]["formattedAddress"]
-    new_restaurant.foursquare_url = venue["canonicalUrl"] if venue["canonicalUrl"]
-    new_restaurant.rating = venue["rating"] / 2 if venue["rating"]
-    new_restaurant.price = venue["price"]["tier"] if venue["price"] && venue["price"]["tier"]
+    new_restaurant.foursquare_id = venue['id']
+    new_restaurant.name = venue['name'] if venue['name']
+    new_restaurant.phone = "0#{venue['contact']['phone'][3..-1]}" if venue["contact"]["phone"]
+    new_restaurant.twitter_id = venue['contact']['twitter'] if venue['contact']['twitter']
+    new_restaurant.facebook_id = venue['contact']['facebook'] if venue['contact']['facebook']
+    new_restaurant.instagram_id = venue['contact']['instagram'] if venue['contact']['instagram']
+    new_restaurant.lat = venue['location']['lat']
+    new_restaurant.lng = venue['location']['lng']
+    new_restaurant.address = venue['location']['formattedAddress'][0..-2].map { |a| a.split ', ' }.flatten.reverse.join(' ') if venue['location']['formattedAddress']
+    new_restaurant.foursquare_url = venue['canonicalUrl'] if venue['canonicalUrl']
+    new_restaurant.rating = venue['rating'] / 2 if venue['rating']
+    new_restaurant.price = venue['price']['tier'] if venue['price'] && venue['price']['tier']
     new_restaurant.tabelog_url = new_restaurant.get_tabelog_url
-    new_restaurant.category = Category.build_with_foursquare_hash venue["categories"][0] if venue["categories"][0]
-    new_restaurant.restaurant_pictures = RestaurantPicture.build_with_foursquare_hash venue["photos"] if venue["photos"]["count"].positive?
+    new_restaurant.category = Category.build_with_foursquare_hash venue['categories'][0] if venue['categories'][0]
+    new_restaurant.restaurant_pictures = RestaurantPicture.build_with_foursquare_hash venue['photos'] if venue['photos']['count'].positive?
     new_restaurant.station = Station.closest(origin: [new_restaurant.lat, new_restaurant.lng])[0]
     return new_restaurant, new_restaurant.category, new_restaurant.restaurant_pictures, new_restaurant.station
   end
