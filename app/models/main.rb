@@ -36,7 +36,7 @@ class Main
       $client_id = $crawling_ids[$account_num-1]
       $client_secret = $crawling_secrets[$account_num-1]
     elsif response_code != 200
-      info = <<-DEBUG
+      info = <<~DEBUG
 
         foursquareからエラーが返ってきました。
         処理は続行しています。
@@ -72,7 +72,7 @@ class Main
       if $lat < south_end
         return Debug.complete if $lng > east_end
 
-        puts <<-DEBUG
+        puts <<~DEBUG
 
             改行します
             lat: #{$lat}

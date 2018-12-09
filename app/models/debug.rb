@@ -1,6 +1,6 @@
 class Debug
   def self.finish
-    info = <<-DEBUG
+    info = <<~DEBUG
 
       処理を終了します。
       ip: #{Scraping.my_ip}
@@ -17,7 +17,7 @@ class Debug
   end
 
   def self.complete
-    info = <<-DEBUG
+    info = <<~DEBUG
 
       領域内のクローリングが全て完了しました！！！。
       lat: #{$lat}
