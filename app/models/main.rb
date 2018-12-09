@@ -93,7 +93,7 @@ class Main
     end
 
     sleep rand(10)
-    main
+    start_crawling
   end
 
   def self.update_params
