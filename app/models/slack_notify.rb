@@ -1,5 +1,5 @@
 class SlackNotify
-  def notify(info)
+  def self.notify(info)
     slack_webhook_url = ENV['slack_webhook_url']
     notifier = Slack::Notifier.new slack_webhook_url do
       defaults username: 'Foursquareクローラー'
