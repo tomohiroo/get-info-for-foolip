@@ -1,4 +1,4 @@
-class Slack
+class SlackNotify
   def notify(info)
     slack_webhook_url = ENV['slack_webhook_url']
     notifier = Slack::Notifier.new slack_webhook_url do

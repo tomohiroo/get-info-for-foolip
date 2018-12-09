@@ -13,7 +13,7 @@ class Debug
       保存したレストランの件数: #{Restaurant.count - $restaurant_number}件
     DEBUG
     puts info
-    Slack.notify info
+    SlackNotify.notify info
   end
 
   def self.complete
@@ -27,7 +27,7 @@ class Debug
       DBのレストランの件数: #{Restaurant.count}
     DEBUG
     puts info
-    Slack.notify info
+    SlackNotify.notify info
   end
 
 end

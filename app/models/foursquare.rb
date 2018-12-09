@@ -32,7 +32,7 @@ class Foursquare
       venue = JSON.parse(response.body)['response']['venue']
       if venue.blank? || venue['id'].blank?
         msg = "venueがnilのerrorが起きました。\nfoursquare_id: #{id}\nvenue: #{venue}\nresponse_code: #{status}\nbody: #{JSON.parse(response.body)}"
-        Slack.notify msg
+        SlackNotify.notify msg
         puts msg
         next
       end

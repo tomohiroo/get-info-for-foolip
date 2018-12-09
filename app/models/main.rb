@@ -29,7 +29,7 @@ class Main
       DEBUG
 
       puts info
-      Slack.notify info
+      SlackNotify.notify info
       return Debug.finish unless $account_num < $crawling_ids.length
 
       $account_num += 1
@@ -52,7 +52,7 @@ class Main
       DEBUG
 
       puts info
-      Slack.notify info
+      SlackNotify.notify info
       $error_count += 1
       if $error_count > 3
         return Debug.finish unless $account_num < $crawling_ids.length

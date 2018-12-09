@@ -17,7 +17,7 @@ class CrawlingController < ApplicationController
         DBのレストランの件数: #{$restaurant_number}
       DEBUG
 
-      Slack.notify msg
+      SlackNotify.notify msg
       puts msg
       Main.start_crawling
     end
