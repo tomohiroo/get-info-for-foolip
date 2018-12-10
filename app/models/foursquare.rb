@@ -42,7 +42,7 @@ class Foursquare
       detail[:pictures] = pictures
       detail[:station] = station
       restaurant_hashes << { restaurant: new_restaurant, detail: detail }
-      sleep 3
+      sleep rand(3)
     end
 
     restaurant_hashes
