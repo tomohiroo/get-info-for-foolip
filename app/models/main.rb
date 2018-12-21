@@ -13,7 +13,7 @@ class Main
     if response_code == 429
       info = <<~DEBUG
 
-        #{$account_num}つ目のfoursquare (Api Key: #{$client_secret})の回数上限に達しました。
+        #{$account_num}つ目のfoursquare (Api Key: #{$client_id})の回数上限に達しました。
         ip: #{Scraping.my_ip}
         lat: #{$lat}
         lng: #{$lng}
@@ -40,6 +40,7 @@ class Main
 
         foursquareからエラーが返ってきました。
         処理は続行しています。
+        Api Key: #{$client_id}
         lat: #{$lat}
         lng: #{$lng}
         ip: #{Scraping.my_ip}
