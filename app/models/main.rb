@@ -93,7 +93,7 @@ class Main
       update_params
     end
 
-    sleep rand(5)
+    sleep rand(10)
     start_crawling
   end
 
