@@ -7,7 +7,7 @@ namespace :crawling do
     notifier.post(
       username: '食べログクローラー',
       icon_url: 'https://is2-ssl.mzstatic.com/image/thumb/Purple118/v4/fb/54/66/fb5466db-9362-dd79-7be2-d13c3609d8b2/AppIcon-1x_U007emarketing-0-0-GLES2_U002c0-512MB-sRGB-0-0-0-85-220-0-0-0-6.png/246x0w.jpg',
-      text: "```食べログurlがnilのお店: #{Restaurant.where(tabelog_url: nil).count}, クロール済みのお店: #{Restaurant.where.not(tabelog_url: nil).count}, ''のお店#{Restaurant.where(tabelog_url: '').count}```"
+      text: "```食べログurlがnilのお店: #{Restaurant.where(tabelog_url: nil).count}, クロール済みのお店: #{Restaurant.where.not(tabelog_url: nil).count}, ''のお店: #{Restaurant.where(tabelog_url: '').count}```"
     )
     agent = Mechanize.new
     agent.user_agent_alias = 'iPhone'
