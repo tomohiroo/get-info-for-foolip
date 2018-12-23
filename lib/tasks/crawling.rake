@@ -16,7 +16,7 @@ namespace :crawling do
       'Upgrade-Insecure-Requests' => '1',
       'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
     }
-    Restaurant.where(tabelog_url: nil).first(50).each do |rst|
+    Restaurant.where(tabelog_url: nil).first(100).each do |rst|
       page = agent.get "https://s.tabelog.com/smartphone/restaurant_list/list?utf8=%E2%9C%93&SrtT=rt&tid=&sk=#{rst.name}&svd=20181118&svps=2&svt=1900&LstCos=0&LstCosT=0&LstRev=&LstSitu=0&LstSmoking=0&area_datatype=&area_id=&keyword_datatype=&keyword_id=&LstReserve=0&lat=#{rst.lat}&lon=#{rst.lng}&LstRange=A&lid=redo_search_form&additional_cond_flg=1"
       not_found_msgs = [page.at('#page-header > div.searchword'), page.at('#js-parent-of-floating-element > p')]
       is_not_tabelog_url = (not_found_msgs[0] && not_found_msgs[0].children[1]['class'] == 'rstname-notfound') || (not_found_msgs[1] && not_found_msgs[1].attributes['class'].value == 'not-found')
