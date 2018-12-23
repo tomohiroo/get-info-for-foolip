@@ -22,4 +22,11 @@ class Scraping
     $error_count = 0
     $restaurant_number = Restaurant.count
   end
+
+  def format_tabelog_url(url)
+    uri = URI.parse(url)
+    uri.host = 'tabelog.com' if uri.host == 's.tabelog.com'
+    uri.query = nil
+    uri.to_s
+  end
 end
